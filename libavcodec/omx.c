@@ -28,6 +28,7 @@
 #include <dlfcn.h>
 #include <OMX_Core.h>
 #include <OMX_Component.h>
+#include <OMX_Broadcom.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -515,6 +516,14 @@ static av_cold int omx_component_init(AVCodecContext *avctx, const char *role)
     err = OMX_SetParameter(s->handle, OMX_IndexParamVideoBitrate, &vid_param_bitrate);
     if (err != OMX_ErrorNone)
         av_log(avctx, AV_LOG_WARNING, "Unable to set video bitrate parameter\n");
+
+    OMX_CONFIG_PORTBOOLEANTYPE vid_param_inline_header = {0, };
+    INIT_STRUCT(vid_param_inline_header);
+    vid_param_inline_header.nPortIndex = s->out_port;
+    vid_param_inline_header.bEnabled = OMX_TRUE;
+    err = OMX_SetParameter(s->handle, OMX_IndexParamBrcmVideoAVCInlineHeaderEnable, &vid_param_inline_header);
+    if (err != OMX_ErrorNone)
+        av_log(avctx, AV_LOG_WARNING, "Unable to set video inline header parameter\n");
 
     if (avctx->codec->id == AV_CODEC_ID_H264) {
         OMX_VIDEO_PARAM_AVCTYPE avc = { 0 };
